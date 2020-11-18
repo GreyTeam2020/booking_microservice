@@ -22,6 +22,8 @@ def _get_response(message: str, code: int, is_custom_obj: bool = False):
     return message, code
 
 
+def error_message(code, message):
+    return {"code": code, "message": message}, code
 
 
 
