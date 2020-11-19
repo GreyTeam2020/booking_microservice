@@ -12,8 +12,7 @@ class SendEmailService:
     @staticmethod
     def booking_confirmation(email: str, restaurant_name: str, splitted_friends, reservation_date):
         """
-        :param email: Email of the new user
-        :param name: Name of the new user
+        method to send booking confermation via email microservice
         """
         current_app.logger.debug("Email to send the email: {}".format(email))
         json = {
