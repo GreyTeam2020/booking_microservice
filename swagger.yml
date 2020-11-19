@@ -9,9 +9,9 @@ paths:
   /book:
     post:
       tags:
-        - User
-      summary: Create a new customer for the application.
-      operationId: app.create_user
+        - Book
+      summary: Book a table in a restaurant
+      operationId: app.create_booking
       requestBody:
         required: true
         content:
