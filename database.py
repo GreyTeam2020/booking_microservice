@@ -26,7 +26,7 @@ def init_db(uri):
     db.metadata.create_all(bind=engine)
 
 
-class Reservation(db.Model):
+class Reservation(db):
     # reservations
     __tablename__ = "reservation"
 
@@ -43,7 +43,7 @@ class Reservation(db.Model):
     checkin = db.Column(db.Boolean, default=False)
 
 
-class Friend(db.Model):
+class Friend(db):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # reservation
     reservation_id = db.Column(db.Integer, db.ForeignKey("reservation.id"))
