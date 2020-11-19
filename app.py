@@ -6,10 +6,11 @@ from database import init_db, Reservation, Friend
 import logging
 
 from model.opening_hours_model import OpeningHoursModel
-from services import UserService
+from services.user_service import UserService
 from services.booking_service import BookingService
 from services.restaurant_service import RestaurantService
 from services.send_email_service import SendEmailService
+from utils.http_utils import HttpUtils
 
 db_session = None
 
@@ -25,26 +26,21 @@ def _get_response(message: str, code: int, is_custom_obj: bool = False):
         return {"result": message}, code
     return message, code
 
-
-def error_message(code, message):
-    return {"code": code, "message": message}, code
-
-
 def create_booking(restaurant_id, user_id, py_datetime, people_number, raw_friends):
     # split friends mail and check if the number is correct
     if people_number > 1:
         splitted_friends = raw_friends.split(";")
         if len(splitted_friends) != (people_number - 1):
-            error_message(400, "You need to specify ONE mail for each person")
+            HttpUtils.error_message(400, "You need to specify ONE mail for each person")
 
     # if user wants to book in the past..
     if py_datetime < datetime.now():
-        error_message(400, "You can not book in the past!")
+        HttpUtils.error_message(400, "You can not book in the past!")
 
     # check if the user is positive
     current_user = UserService.get_user_info(user_id)
     if current_user.is_positive:
-        error_message(401, "You are marked as positive!")
+        HttpUtils.error_message(401, "You are marked as positive!")
     week_day = py_datetime.weekday()
 
     # check if the restaurant is open. 12 in open_lunch means open at lunch. 20 in open_dinner means open at dinner.
@@ -54,7 +50,7 @@ def create_booking(restaurant_id, user_id, py_datetime, people_number, raw_frien
     # the restaurant is closed
     if len(opening_hour) == 0:
         print("No Opening hour")
-        error_message(404, "The restaurant is closed")
+        HttpUtils.error_message(404, "The restaurant is closed")
 
     # bind to obj
     opening_hour = OpeningHoursModel()
@@ -121,7 +117,7 @@ def create_booking(restaurant_id, user_id, py_datetime, people_number, raw_frien
 
         return {"id": new_reservation, "restaurant_name": restaurant_name, "table_name": table_name}, 200
     else:
-        error_message(404, "No tables available")
+        HttpUtils.error_message(404, "No tables available")
 
 # --------- END API definition --------------------------
 logging.basicConfig(level=logging.DEBUG)
@@ -142,6 +138,7 @@ def _init_flask_app(flask_app, conf_type: str = "config.DebugConfiguration"):
     :param flask_app:
     """
     flask_app.config.from_object(conf_type)
+    flask_app.config["DB_SESSION"] = db_session
 
 
 @application.teardown_appcontext

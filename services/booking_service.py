@@ -1,11 +1,11 @@
 import logging
 from datetime import datetime, timedelta
 
+from flask import current_app
 from sqlalchemy import or_
-
-import app
 from database import Reservation
-from app import db_session
+from utils.http_utils import HttpUtils
+
 
 class BookingService:
     """
@@ -37,6 +37,7 @@ class BookingService:
 
     @staticmethod
     def get_free_tables(tables, people_number: int, py_datetime: str, avg_time: int):
+        db_session = current_app.config["DB_SESSION"]
         table_list = BookingService.filter_table_min_seat(tables, people_number)
         reservations = (
             db_session.session.query(Reservation)
@@ -77,7 +78,7 @@ class BookingService:
         # strange situation.. but it could happen
         # opening hour is in db but the restaurant is closed both lunch and dinner
         if opening_hour.open_lunch is None and opening_hour.open_dinner is None:
-            app.error_message(404, "The restaurant is closed")
+            HttpUtils.error_message(404, "The restaurant is closed")
 
         # if the restaurant is open only at lunch or at dinner do some checks..
         if opening_hour.open_lunch is None or opening_hour.close_lunch is None:
@@ -100,12 +101,12 @@ class BookingService:
                     py_datetime > close_dinner_projection
                     or py_datetime < open_dinner_projection
             ):
-                app.error_message(404, "The restaurant is closed")
+                HttpUtils.error_message(404, "The restaurant is closed")
 
         if (opening_hour.open_dinner is None or opening_hour.close_dinner is None) and (
                 only_time < opening_hour.open_lunch or only_time > opening_hour.close_lunch
         ):
-            app.error_message(404, "The restaurant is closed")
+            HttpUtils.error_message(404, "The restaurant is closed")
         #
 
         # if the restaurant is opened both at dinner and lunch
@@ -114,15 +115,15 @@ class BookingService:
             if only_time < opening_hour.open_lunch:
                 if opening_hour.close_dinner < opening_hour.open_dinner:
                     if only_time > opening_hour.close_dinner:
-                        app.error_message(404, "The restaurant is closed")
+                        HttpUtils.error_message(404, "The restaurant is closed")
                 else:
-                    app.error_message(404, "The restaurant is closed")
+                    HttpUtils.error_message(404, "The restaurant is closed")
 
             if (
                     only_time < opening_hour.open_dinner
                     and only_time > opening_hour.close_lunch
             ):
-                app.error_message(404, "The restaurant is closed")
+                HttpUtils.error_message(404, "The restaurant is closed")
 
             if opening_hour.close_dinner < opening_hour.open_dinner:
                 close_dinner_projection = datetime.combine(
@@ -135,5 +136,5 @@ class BookingService:
                 )
 
             if py_datetime > close_dinner_projection:
-                app.error_message(404, "The restaurant is closed")
+                HttpUtils.error_message(404, "The restaurant is closed")
             #

@@ -62,3 +62,7 @@ class HttpUtils:
         json = response.json()
         current_app.logger.debug("Response is: ".format(json))
         return json
+
+    @staticmethod
+    def error_message(code, message):
+        return {"code": code, "message": message}, code

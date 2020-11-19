@@ -30,22 +30,23 @@ class Reservation(db):
     # reservations
     __tablename__ = "reservation"
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    reservation_date = db.Column(db.DateTime)
-    reservation_end = db.Column(db.DateTime)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    reservation_date = Column(DateTime)
+    reservation_end = Column(DateTime)
     # customer that did the the reservation
-    customer_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    customer_id = Column(Integer)
     #
     # reserved table
-    table_id = db.Column(db.Integer, db.ForeignKey("restaurant_table.id"))
+    table_id = Column(Integer)
     #
-    people_number = db.Column(db.Integer)  # number of people in this reservation
-    checkin = db.Column(db.Boolean, default=False)
+    people_number = Column(Integer)  # number of people in this reservation
+    checkin = Column(Boolean, default=False)
 
 
 class Friend(db):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    __tablename__ = "friend"
+    id = Column(Integer, primary_key=True, autoincrement=True)
     # reservation
-    reservation_id = db.Column(db.Integer, db.ForeignKey("reservation.id"))
+    reservation_id = Column(Integer, ForeignKey("reservation.id"))
     # email
-    email = db.Column(db.Text())
+    email = Column(Text())
