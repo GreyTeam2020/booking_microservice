@@ -5,3 +5,98 @@ info:
   version: "0.1"
 servers:
 - url: /
+paths:
+  /book:
+    post:
+      tags:
+        - User
+      summary: Create a new customer for the application.
+      operationId: app.create_user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestBooking'
+      responses:
+        200:
+          description: "The operation is gone"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        404:
+          description: "Resource don't found"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+        500:
+          description: "The code returned if there is some error on server"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+
+components:
+  schemas:
+    RequestBooking:
+      required:
+      - restaurant_id
+      - user_id
+      - datetime
+      - people_number
+      - raw_friends
+      type: object
+      properties:
+        restaurant_id:
+          type: integer
+          description: ID of restaurant to book
+          example: 12
+        user_id:
+          type: integer
+          description: ID of user that want to book
+          example: 125
+        datetime:
+          type: string
+          format: date-time
+          description: When you want to book
+          example: "2021-07-21T20:30:00Z"
+        people_number:
+          type: integer
+          description: Number of people to book for
+          example: 3
+        raw_friends:
+          type: string
+          description: list of friends' email separated by semicolumn
+          example: "john.doe@mail.com;james@mail.com"
+    Booking:
+      required:
+      - restaurant_name
+      - table_name
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the new booking
+          example: 564
+        restaurant_name:
+          type: string
+          description: The restaurant name
+          example: "Gino's Pizzeria"
+        table_name:
+          type: string
+          description: The booked Table name
+          example: "Table 23A"
+    Result:
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: integer
+          description: HTTP Status Code
+        message:
+          type: string
+          default: Type of result
+          example: "Message to describe what happen on server"
