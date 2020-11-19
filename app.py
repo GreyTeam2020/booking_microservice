@@ -151,4 +151,4 @@ def shutdown_session(exception=None):
 
 if __name__ == "__main__":
     _init_flask_app(application)
-    app.run(port=5002)
+    app.run(port=5004)
