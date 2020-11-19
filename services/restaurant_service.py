@@ -1,6 +1,3 @@
-import requests
-from flask import current_app
-
 import app
 from app_constant import RESTAURANTS_MICROSERVICE_URL
 from utils.http_utils import HttpUtils

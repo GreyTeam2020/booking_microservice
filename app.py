@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 import connexion
 from database import init_db, Reservation, Friend
 import logging
-from flask import request, jsonify, current_app
 
 from model.opening_hours_model import OpeningHoursModel
 from services import UserService

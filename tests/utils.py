@@ -1,16 +1,4 @@
-from datetime import datetime, timedelta
-from random import randrange
 
-from sqlalchemy import or_
-
-import app
-from database import Reservation, Friend
-from model.opening_hours_model import OpeningHoursModel
-from services.user_service import UserService
-from services.booking_service import BookingService
-from services.restaurant_service import RestaurantService
-from services.send_email_service import SendEmailService
-from app import db_session
 
 class Utils:
     """
