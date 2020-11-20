@@ -32,15 +32,19 @@ class BookingService:
     def get_table_name(tables, table_id: int):
         for table in tables:
             if table["id"] == table_id:
+                if table["name"] == "":
+                    return "Table #{}".format(table["id"])
                 return table["name"]
         return "NO_NAME"
 
     @staticmethod
-    def get_free_tables(tables, people_number: int, py_datetime: str, avg_time: int):
+    def get_free_tables(tables, people_number: int, py_datetime: datetime, avg_time: int):
         db_session = current_app.config["DB_SESSION"]
         table_list = BookingService.filter_table_min_seat(tables, people_number)
+        ints = [table["id"] for table in table_list]
+
         reservations = (
-            db_session.session.query(Reservation)
+            db_session.query(Reservation)
                 .filter(
                 or_(
                     Reservation.reservation_date.between(
@@ -51,24 +55,30 @@ class BookingService:
                     ),
                 )
             )
-                .filter(Reservation.table_id.in_(table_list))
+                .filter(Reservation.table_id.in_(ints))
         ).all()
         booked_tables = [reservation.table_id for reservation in reservations]
 
-        return list(set(table_list) - set(booked_tables))
+        free_tables = []
+        for table in table_list:
+            if table["id"] not in booked_tables:
+                free_tables.append(table)
+
+        return free_tables
 
     @staticmethod
-    def get_min_seats_table(tables ):
+    def get_min_seats_table(tables):
         min_value = (
-            tables[0].id,
-            tables[0].max_seats,
+            tables[0]["id"],
+            tables[0]["max_seats"],
         )
         for i in range(1, len(tables)):
-            if tables[i].max_seats < min_value[1]:
+            if tables[i]["max_seats"] < min_value[1]:
                 min_value = (
-                    tables[i].id,
-                    tables[i].max_seats,
+                    tables[i]["id"],
+                    tables[i]["max_seats"],
                 )
+
         return min_value[0]
 
     @staticmethod
@@ -78,7 +88,7 @@ class BookingService:
         # strange situation.. but it could happen
         # opening hour is in db but the restaurant is closed both lunch and dinner
         if opening_hour.open_lunch is None and opening_hour.open_dinner is None:
-            HttpUtils.error_message(404, "The restaurant is closed")
+            return HttpUtils.error_message(404, "The restaurant is closed")
 
         # if the restaurant is open only at lunch or at dinner do some checks..
         if opening_hour.open_lunch is None or opening_hour.close_lunch is None:
@@ -101,13 +111,12 @@ class BookingService:
                     py_datetime > close_dinner_projection
                     or py_datetime < open_dinner_projection
             ):
-                HttpUtils.error_message(404, "The restaurant is closed")
+                return HttpUtils.error_message(404, "The restaurant is closed")
 
         if (opening_hour.open_dinner is None or opening_hour.close_dinner is None) and (
                 only_time < opening_hour.open_lunch or only_time > opening_hour.close_lunch
         ):
-            HttpUtils.error_message(404, "The restaurant is closed")
-        #
+            return HttpUtils.error_message(404, "The restaurant is closed")
 
         # if the restaurant is opened both at dinner and lunch
         if opening_hour.open_lunch is not None and opening_hour.open_dinner is not None:
@@ -115,16 +124,14 @@ class BookingService:
             if only_time < opening_hour.open_lunch:
                 if opening_hour.close_dinner < opening_hour.open_dinner:
                     if only_time > opening_hour.close_dinner:
-                        HttpUtils.error_message(404, "The restaurant is closed")
+                        return HttpUtils.error_message(404, "The restaurant is closed")
                 else:
-                    HttpUtils.error_message(404, "The restaurant is closed")
-
+                    return HttpUtils.error_message(404, "The restaurant is closed")
             if (
                     only_time < opening_hour.open_dinner
                     and only_time > opening_hour.close_lunch
             ):
-                HttpUtils.error_message(404, "The restaurant is closed")
-
+                return HttpUtils.error_message(404, "The restaurant is closed")
             if opening_hour.close_dinner < opening_hour.open_dinner:
                 close_dinner_projection = datetime.combine(
                     py_datetime.date() + timedelta(days=1),
@@ -134,7 +141,6 @@ class BookingService:
                 close_dinner_projection = datetime.combine(
                     py_datetime.date(), opening_hour.close_dinner
                 )
-
             if py_datetime > close_dinner_projection:
-                HttpUtils.error_message(404, "The restaurant is closed")
-            #
+                return HttpUtils.error_message(404, "The restaurant is closed")
+        return True

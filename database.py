@@ -25,6 +25,8 @@ def init_db(uri):
     db.query = db_session.query_property()
     db.metadata.create_all(bind=engine)
 
+    return db_session
+
 
 class Reservation(db):
     # reservations

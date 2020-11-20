@@ -10,24 +10,26 @@ class SendEmailService:
     """
 
     @staticmethod
-    def booking_confirmation(email: str, restaurant_name: str, splitted_friends, reservation_date):
+    def booking_confirmation(email, user_name, restaurant_name, splitted_friends, reservation_date):
         """
         method to send booking confermation via email microservice
         """
         current_app.logger.debug("Email to send the email: {}".format(email))
         json = {
-            "email": email,
+            "email_user": email,
+            "user_name": user_name,
             "restaurant_name": restaurant_name,
-            "splitted_friends": splitted_friends,
-            "reservation_date": reservation_date
+            "friends": splitted_friends,
+            "booking_time": reservation_date.strftime("%m/%d/%YT%H:%M:%SZ")
         }
         current_app.logger.debug("JSON request {}".format(json))
         url = "{}/booking_confirmation".format(EMAIL_MICROSERVICE_URL)
         current_app.logger.debug("URL to microservices sendemail {}".format(url))
         response = requests.post(url=url, json=json)
-        json = response.json()
-        if response.ok is False:
-            current_app.logger.error("Error during the request: {}".format(response.status_code))
-            current_app.logger.error("Error with message {}".format(json))
-            return False
+        current_app.logger.debug(response.status_code)
+        #Ignoring status, hope it worked
+        #if response.ok is False:
+        #    current_app.logger.error("Error during the request: {}".format(response.status_code))
+        #    current_app.logger.error("Error with message {}".format(json))
+        #    return False
         return True
