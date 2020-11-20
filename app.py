@@ -140,7 +140,6 @@ def create_booking():
     else:
         return HttpUtils.error_message(404, "No tables available")
 
-
 def delete_booking(reservation_id, user_id):
     query = (
         db_session.query(Reservation)
@@ -169,6 +168,14 @@ def get_booking(reservation_id):
 
     return BookingService.Reservation2JSON(reservation), 200
 
+
+def get_all_bookings():
+    reservations = db_session.query(Reservation).all()
+
+    if reservations is None:
+        return HttpUtils.error_message(404, "No Reservations")
+
+    return BookingService.Reservations2JSON(reservations), 200
 
 # --------- END API definition --------------------------
 logging.basicConfig(level=logging.DEBUG)

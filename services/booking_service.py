@@ -157,3 +157,10 @@ class BookingService:
             "people_number": reservation.people_number,
             "checkin": reservation.checkin
         }
+
+    @staticmethod
+    def Reservations2JSON(reservations):
+        to_return = []
+        for r in reservations:
+            to_return.append(BookingService.Reservation2JSON(r))
+        return to_return

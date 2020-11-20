@@ -37,6 +37,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Result'
+    get:
+      tags:
+        - Book
+      summary: Get all reservations
+      operationId: app.get_all_bookings
+      responses:
+        200:
+          description: Return Books
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleBook'
+        404:
+          description: Reservation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
   /book/{reservation_id}:
     get:
       tags:
