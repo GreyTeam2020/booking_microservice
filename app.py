@@ -2,6 +2,8 @@ import os
 from datetime import datetime, timedelta
 
 import connexion
+from flask import request, current_app
+
 from database import init_db, Reservation, Friend
 import logging
 
@@ -26,9 +28,17 @@ def _get_response(message: str, code: int, is_custom_obj: bool = False):
         return {"result": message}, code
     return message, code
 
-def create_booking(restaurant_id, user_id, py_datetime, people_number, raw_friends):
+def create_booking():
+    json = request.get_json()
+    current_app.logger.debug("Request received: {}".format(json))
+    restaurant_id = json["restaurant_id"]
+    user_id = json["user_id"]
+    raw_friends = json["raw_friends"]
+    py_datetime = datetime.strptime(json["datetime"], "%Y-%m-%dT%H:%m:%SZ")
+    people_number = json["people_number"]
+
     # split friends mail and check if the number is correct
-    if people_number > 1:
+    if request.people_number > 1:
         splitted_friends = raw_friends.split(";")
         if len(splitted_friends) != (people_number - 1):
             HttpUtils.error_message(400, "You need to specify ONE mail for each person")
@@ -143,7 +153,8 @@ def _init_flask_app(flask_app, conf_type: str = "config.DebugConfiguration"):
 
 @application.teardown_appcontext
 def shutdown_session(exception=None):
-    db_session.remove()
+    if db_session is not None:
+        db_session.remove()
 
 
 if __name__ == "__main__":
