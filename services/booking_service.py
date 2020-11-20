@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timedelta
 
 from flask import current_app
+from monolith.database import RestaurantTable
 from sqlalchemy import or_
 from database import Reservation
 from utils.http_utils import HttpUtils
@@ -144,3 +145,15 @@ class BookingService:
             if py_datetime > close_dinner_projection:
                 return HttpUtils.error_message(404, "The restaurant is closed")
         return True
+
+    @staticmethod
+    def Reservation2JSON(reservation):
+        return {
+            "id": reservation.id,
+            "reservation_date": reservation.reservation_date,
+            "reservation_end": reservation.reservation_end,
+            "customer_id": reservation.customer_id,
+            "table_id": reservation.table_id,
+            "people_number": reservation.people_number,
+            "checkin": reservation.checkin
+        }

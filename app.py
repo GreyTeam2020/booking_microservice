@@ -1,3 +1,5 @@
+import decimal
+import json
 import os
 from datetime import datetime, timedelta
 
@@ -137,6 +139,36 @@ def create_booking():
         return {"id": new_reservation.id, "restaurant_name": restaurant_name, "table_name": table_name}, 200
     else:
         return HttpUtils.error_message(404, "No tables available")
+
+
+def delete_booking(reservation_id, user_id):
+    query = (
+        db_session.query(Reservation)
+            .filter_by(id=reservation_id)
+            .filter_by(customer_id=user_id)
+    )
+
+    to_delete = query.first()
+    if to_delete is None:
+        return HttpUtils.error_message(404, "Reservation not Found")
+
+    query.delete()
+    db_session.commit()
+    return {"code": 200, "message": "Deleted Successfully"}, 200
+
+
+def get_booking(reservation_id):
+    reservation = (
+        db_session.query(Reservation)
+            .filter_by(id=reservation_id)
+            .first()
+    )
+
+    if reservation is None:
+        return HttpUtils.error_message(404, "Reservation not Found")
+
+    return BookingService.Reservation2JSON(reservation), 200
+
 
 # --------- END API definition --------------------------
 logging.basicConfig(level=logging.DEBUG)
