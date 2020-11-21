@@ -2,7 +2,6 @@ import logging
 from datetime import datetime, timedelta
 
 from flask import current_app
-from monolith.database import RestaurantTable
 from sqlalchemy import or_
 from database import Reservation
 from utils.http_utils import HttpUtils

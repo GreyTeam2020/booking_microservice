@@ -42,6 +42,30 @@ paths:
         - Book
       summary: Get all reservations
       operationId: app.get_all_bookings
+      parameters:
+        - name: user_id
+          in: query
+          description: Filtering for user_id
+          required: false
+          example: 12
+          schema:
+            type: integer
+        - name: fromDate
+          in: query
+          description: Filtering for >= fromDate
+          required: false
+          example: 12
+          schema:
+            type: string
+            format: datetime
+        - name: toDate
+          in: query
+          description: Filtering for <= toDate
+          required: false
+          example: 12
+          schema:
+            type: string
+            format: datetime
       responses:
         200:
           description: Return Books
@@ -78,6 +102,44 @@ paths:
                 $ref: '#/components/schemas/SimpleBook'
         404:
           description: Reservation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+    put:
+      tags:
+        - Book
+      summary: Update a reservation
+      operationId: app.update_booking
+      parameters:
+        - name: reservation_id
+          in: path
+          description: Reservation's Unique identifier
+          required: true
+          example: 54
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestBooking'
+      responses:
+        200:
+          description: "The operation completed successfully"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        404:
+          description: "Resource don't found"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+        500:
+          description: "The code returned if there is some error on server"
           content:
             application/json:
               schema:

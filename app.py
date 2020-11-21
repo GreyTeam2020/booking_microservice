@@ -30,8 +30,12 @@ def _get_response(message: str, code: int, is_custom_obj: bool = False):
         return {"result": message}, code
     return message, code
 
-def create_booking():
-    json = request.get_json()
+
+def create_booking(private=False):
+    if private is False:
+        json = request.get_json()
+    else:
+        json = private
     current_app.logger.debug("Request received: {}".format(json))
     restaurant_id = json["restaurant_id"]
     user_id = json["user_id"]
@@ -169,13 +173,37 @@ def get_booking(reservation_id):
     return BookingService.Reservation2JSON(reservation), 200
 
 
-def get_all_bookings():
-    reservations = db_session.query(Reservation).all()
+def get_all_bookings(user_id=False, fromDate=False, toDate=False):
+    print([user_id, fromDate, toDate])
 
+    reservations = db_session.query(Reservation)
+    # Filtering stuff
+    if user_id is not False:
+        reservations = reservations.filter(Reservation.customer_id == user_id)
+    if fromDate is not False:
+        reservations = reservations.filter(Reservation.reservation_date >= datetime.strptime(fromDate, "%Y-%m-%dT%H:%M:%SZ"))
+    if toDate is not False:
+        reservations = reservations.filter(Reservation.reservation_end <= datetime.strptime(toDate, "%Y-%m-%dT%H:%M:%SZ"))
+
+    reservations = reservations.all()
     if reservations is None:
         return HttpUtils.error_message(404, "No Reservations")
 
     return BookingService.Reservations2JSON(reservations), 200
+
+
+def update_booking(reservation_id):
+    json = request.get_json()
+
+    response, code = delete_booking(reservation_id, json["user_id"])
+    if code != 200:
+        return code
+
+    response, code = create_booking(json)
+    if code != 200:
+        return HttpUtils.error_message(500, "Internal Error, the booking has been deleted, please replace it")
+    return response, code
+
 
 # --------- END API definition --------------------------
 logging.basicConfig(level=logging.DEBUG)
