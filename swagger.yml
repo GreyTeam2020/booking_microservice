@@ -72,7 +72,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SimpleBook'
+                $ref: '#/components/schemas/ReservationWithRestaurant'
         404:
           description: Reservation not found
           content:
@@ -275,6 +275,80 @@ components:
           type: boolean
           description: If customer entered the restaurant
           example: True
+    ReservationWithRestaurant:
+      required:
+        - id
+        - reservation_date
+        - reservation_end
+        - customer_id
+        - table
+        - people_number
+        - checkin
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the new booking
+          example: 564
+        reservation_date:
+          type: string
+          format: date-time
+          description: Reservation datetime
+          example: "2021-07-21T20:30:00Z"
+        reservation_end:
+          type: string
+          format: date-time
+          description: Reservation end datetime
+          example: "2021-07-21T20:50:00Z"
+        customer_id:
+          type: integer
+          description: Customer of the Reservation
+          example: 12
+        table:
+          type: object
+          $ref: '#/components/schemas/Table'
+        people_number:
+          type: integer
+          description: Number of the people in the booking
+          example: 3
+        checkin:
+          type: boolean
+          description: If customer entered the restaurant
+          example: True
+    Table:
+      required:
+        - id
+      type: object
+      properties:
+        name:
+          maxLength: 100
+          minLength: 1
+          type: string
+          description: Name of the table
+          example: "Table name"
+        id:
+          type: integer
+          description: id of the table
+          example: 3
+        restaurant:
+          type: object
+          $ref: '#/components/schemas/Restaurant'
+    Restaurant:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier
+          example: 123
+        name:
+          maxLength: 100
+          minLength: 1
+          type: string
+          description: Restaurant's name
+          example: "My Pizza Restaurant"
     Result:
       required:
         - code
