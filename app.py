@@ -49,7 +49,7 @@ def create_booking(private=False):
         splitted_friends = raw_friends.split(";")
         if len(splitted_friends) != (people_number - 1):
             return HttpUtils.error_message(400, "You need to specify ONE mail for each person")
-    current_app.logger.debug("Friends: {}".format(str(splitted_friends)))
+        current_app.logger.debug("Friends: {}".format(str(splitted_friends)))
     # if user wants to book in the past..
     if py_datetime < datetime.now():
         return HttpUtils.error_message(400, "You can not book in the past!")
