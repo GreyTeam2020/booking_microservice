@@ -15,6 +15,7 @@ from services.booking_service import BookingService
 from services.restaurant_service import RestaurantService
 from services.send_email_service import SendEmailService
 from utils.http_utils import HttpUtils
+from app_constant import RESTAURANTS_MICROSERVICE_URL
 
 db_session = None
 
@@ -174,7 +175,6 @@ def get_booking(reservation_id):
 
 
 def get_all_bookings(user_id=False, fromDate=False, toDate=False):
-    print([user_id, fromDate, toDate])
 
     reservations = db_session.query(Reservation)
     # Filtering stuff
@@ -188,6 +188,9 @@ def get_all_bookings(user_id=False, fromDate=False, toDate=False):
     reservations = reservations.all()
     if reservations is None:
         return HttpUtils.error_message(404, "No Reservations")
+
+    for i, reservation in enumerate(reservations):
+        reservations[i] = BookingService.replace_with_restaurant(reservation)
 
     return BookingService.Reservations2JSON(reservations), 200
 
