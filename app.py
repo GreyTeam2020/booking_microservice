@@ -216,7 +216,7 @@ application = app.app
 if "GOUOUTSAFE_TEST" in os.environ and os.environ["GOUOUTSAFE_TEST"] == "1":
     db_session = init_db("sqlite:///tests/booking.db")
 else:
-    db_session = init_db("sqlite:///db/booking.db")
+    db_session = init_db("sqlite:///booking.db")
 app.add_api("swagger.yml")
 
 
