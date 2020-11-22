@@ -1,7 +1,7 @@
 import datetime
 
 from services.booking_service import BookingService
-from tests.test_utils import Utils
+from utils.utils_test import Utils
 
 
 class Test_Units:

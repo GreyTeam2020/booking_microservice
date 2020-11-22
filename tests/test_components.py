@@ -1,7 +1,4 @@
-import logging
-
-from test_utils import Utils
-from services import BookingService
+from utils.utils_test import Utils
 
 
 class Test_Components:

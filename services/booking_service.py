@@ -19,7 +19,6 @@ class BookingService:
     def filter_openings(openings, week_day=None):
         if week_day is not None:
             openings = [obj for obj in openings if (obj['week_day'] == week_day)]
-
         return openings
 
     @staticmethod
@@ -149,7 +148,7 @@ class BookingService:
         return True
 
     @staticmethod
-    def Reservation2JSON(reservation, with_restaurant=False):
+    def reservation_to_json(reservation, with_restaurant=False):
         if not with_restaurant:
             return {
                 "id": reservation.id,
@@ -183,11 +182,11 @@ class BookingService:
             }
 
     @staticmethod
-    def Reservations2JSON(reservations):
+    def reservations_to_json(reservations):
         current_app.logger.debug("I'm the translator, i got: {}".format(reservations))
         to_return = []
         for r in reservations:
-            to_return.append(BookingService.Reservation2JSON(r, True))
+            to_return.append(BookingService.reservation_to_json(r, True))
         current_app.logger.debug(to_return)
         return to_return
 
