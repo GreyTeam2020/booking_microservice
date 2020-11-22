@@ -8,4 +8,4 @@ jobs:
       - name: Book microservices testing
         run: |
           docker-compose up -d
-          docker-compose exec -T pytest tests/test_units.py --cov-config .coveragerc --cov .
+          docker-compose exec -T booking_microservice pytest tests/test_units.py --cov-config .coveragerc --cov .
