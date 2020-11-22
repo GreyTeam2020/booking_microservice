@@ -66,6 +66,13 @@ paths:
           schema:
             type: string
             format: datetime
+        - name: restaurant_id
+          in: query
+          description: Filtering for restaurant
+          required: false
+          example: 12
+          schema:
+            type: integer
       responses:
         200:
           description: Return Books

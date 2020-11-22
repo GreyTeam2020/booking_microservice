@@ -174,7 +174,7 @@ def get_booking(reservation_id):
     return BookingService.reservation_to_json(reservation), 200
 
 
-def get_all_bookings(user_id=False, fromDate=False, toDate=False):
+def get_all_bookings(user_id=False, fromDate=False, toDate=False, restaurant_id=False):
 
     reservations = db_session.query(Reservation)
     # Filtering stuff
@@ -184,6 +184,10 @@ def get_all_bookings(user_id=False, fromDate=False, toDate=False):
         reservations = reservations.filter(Reservation.reservation_date >= datetime.strptime(fromDate, "%Y-%m-%dT%H:%M:%SZ"))
     if toDate is not False:
         reservations = reservations.filter(Reservation.reservation_end <= datetime.strptime(toDate, "%Y-%m-%dT%H:%M:%SZ"))
+    if restaurant_id is not False:
+        tables = RestaurantService.get_tables(restaurant_id)
+        ints = [table["id"] for table in tables]
+        reservations = reservations.filter(Reservation.table_id.in_(ints))
 
     reservations = reservations.all()
     if reservations is None:
