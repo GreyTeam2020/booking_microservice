@@ -187,12 +187,14 @@ def get_all_bookings(user_id=False, fromDate=False, toDate=False, restaurant_id=
     if restaurant_id is not False:
         tables = RestaurantService.get_tables(restaurant_id)
         ints = [table["id"] for table in tables]
+        current_app.logger.debug("TABLES INTS: {}".format(ints))
         reservations = reservations.filter(Reservation.table_id.in_(ints))
 
     reservations = reservations.all()
     if reservations is None:
         return HttpUtils.error_message(404, "No Reservations")
 
+    current_app.logger.debug("reservations len={}".format(len(reservations)))
     for i, reservation in enumerate(reservations):
         reservations[i] = BookingService.replace_with_restaurant(reservation)
         reservation[i].people = []
