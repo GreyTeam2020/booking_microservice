@@ -194,8 +194,10 @@ class BookingService:
     def replace_with_restaurant(reservation):
         response = HttpUtils.make_get_request("{}/table/{}".format(RESTAURANTS_MICROSERVICE_URL, reservation.table_id))
 
+        current_app.logger.debug("ok, adding")
         r2 = ReservationRestaurantModel()
         r2.fill_from_Reservation(reservation)
 
         r2.addTable(response)
+        current_app.logger.debug("added")
         return r2
