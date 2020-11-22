@@ -20,7 +20,7 @@ class SendEmailService:
             "user_name": user_name,
             "restaurant_name": restaurant_name,
             "friends": splitted_friends,
-            "booking_time": reservation_date.strftime("%m/%d/%YT%H:%M:%SZ")
+            "booking_time": reservation_date.strftime("%Y-%m-%dT%H:%M:%SZ")
         }
         current_app.logger.debug("JSON request {}".format(json))
         url = "{}/booking_confirmation".format(EMAIL_MICROSERVICE_URL)
