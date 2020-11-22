@@ -16,6 +16,6 @@ def del_db():
     try:
         my_path = os.path.abspath(os.path.dirname(__file__))
         path = os.path.join(my_path, "../")
-        os.remove("{}/user.db".format(path))
+        os.remove("{}/booking.db".format(path))
     except OSError:
         assert False

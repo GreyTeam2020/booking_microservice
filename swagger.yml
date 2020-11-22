@@ -72,7 +72,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReservationWithRestaurant'
+                $ref: '#/components/schemas/ReservationWithRestaurantandFriends'
         404:
           description: Reservation not found
           content:
@@ -275,7 +275,7 @@ components:
           type: boolean
           description: If customer entered the restaurant
           example: True
-    ReservationWithRestaurant:
+    ReservationWithRestaurantandFriends:
       required:
         - id
         - reservation_date
@@ -283,6 +283,7 @@ components:
         - customer_id
         - table
         - people_number
+        - people
         - checkin
       type: object
       properties:
@@ -311,6 +312,12 @@ components:
           type: integer
           description: Number of the people in the booking
           example: 3
+        people:
+          type: array
+          items:
+            type: string
+          description: Friends emails
+          example: ["friend1@me.com","friend2@me.com"]
         checkin:
           type: boolean
           description: If customer entered the restaurant
