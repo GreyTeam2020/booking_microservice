@@ -191,6 +191,10 @@ def get_all_bookings(user_id=False, fromDate=False, toDate=False):
 
     for i, reservation in enumerate(reservations):
         reservations[i] = BookingService.replace_with_restaurant(reservation)
+        reservation[i].people = []
+        friends = db_session.query(Friend).filter_by(reservation_id=reservation.id)
+        for friend in friends:
+            reservation[i].people.append(friend.email.strip())
 
     return BookingService.Reservations2JSON(reservations), 200
 

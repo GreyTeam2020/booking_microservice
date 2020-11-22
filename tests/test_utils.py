@@ -87,7 +87,7 @@ class Utils:
         ])
 
     @staticmethod
-    def insert_reservation(py_datetime = datetime.datetime(year=2021, month=4, day=27, hour=12, minute=30), avg_time = 30, people_number = 2, table_id = 3):
+    def insert_reservation(py_datetime = datetime.datetime(year=2021, month=4, day=27, hour=12, minute=30), avg_time = 30, people_number = 2, table_id = 3, user_id = 1):
         db_session = current_app.config["DB_SESSION"]
 
         friends_mail=[]
@@ -99,7 +99,7 @@ class Utils:
         new_reservation = Reservation()
         new_reservation.reservation_date = py_datetime
         new_reservation.reservation_end = py_datetime + datetime.timedelta(minutes=avg_time)
-        new_reservation.customer_id = 1
+        new_reservation.customer_id = user_id
         new_reservation.table_id = table_id
         new_reservation.people_number = people_number
         db_session.add(new_reservation)
@@ -112,6 +112,7 @@ class Utils:
                 db_session.add(new_friend)
         db_session.commit()
 
+        return new_reservation
     @staticmethod
     def delete_all_reservations():
         db_session = current_app.config["DB_SESSION"]
