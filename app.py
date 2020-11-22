@@ -171,7 +171,7 @@ def get_booking(reservation_id):
     if reservation is None:
         return HttpUtils.error_message(404, "Reservation not Found")
 
-    return BookingService.Reservation2JSON(reservation), 200
+    return BookingService.reservation_to_json(reservation), 200
 
 
 def get_all_bookings(user_id=False, fromDate=False, toDate=False):
@@ -192,7 +192,7 @@ def get_all_bookings(user_id=False, fromDate=False, toDate=False):
     for i, reservation in enumerate(reservations):
         reservations[i] = BookingService.replace_with_restaurant(reservation)
 
-    return BookingService.Reservations2JSON(reservations), 200
+    return BookingService.reservations_to_json(reservations), 200
 
 
 def update_booking(reservation_id):
