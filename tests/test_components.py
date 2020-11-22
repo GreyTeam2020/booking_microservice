@@ -1,6 +1,6 @@
 import logging
 
-from test_utils import Utils
+from tests.test_utils import Utils
 from services import BookingService
 
 
