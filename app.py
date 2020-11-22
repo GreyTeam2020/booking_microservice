@@ -15,6 +15,7 @@ from services.booking_service import BookingService
 from services.restaurant_service import RestaurantService
 from services.send_email_service import SendEmailService
 from utils.http_utils import HttpUtils
+from app_constant import RESTAURANTS_MICROSERVICE_URL
 
 db_session = None
 
@@ -48,7 +49,7 @@ def create_booking(private=False):
         splitted_friends = raw_friends.split(";")
         if len(splitted_friends) != (people_number - 1):
             return HttpUtils.error_message(400, "You need to specify ONE mail for each person")
-    current_app.logger.debug("Friends: {}".format(str(splitted_friends)))
+        current_app.logger.debug("Friends: {}".format(str(splitted_friends)))
     # if user wants to book in the past..
     if py_datetime < datetime.now():
         return HttpUtils.error_message(400, "You can not book in the past!")
@@ -174,7 +175,6 @@ def get_booking(reservation_id):
 
 
 def get_all_bookings(user_id=False, fromDate=False, toDate=False):
-    print([user_id, fromDate, toDate])
 
     reservations = db_session.query(Reservation)
     # Filtering stuff
@@ -188,6 +188,9 @@ def get_all_bookings(user_id=False, fromDate=False, toDate=False):
     reservations = reservations.all()
     if reservations is None:
         return HttpUtils.error_message(404, "No Reservations")
+
+    for i, reservation in enumerate(reservations):
+        reservations[i] = BookingService.replace_with_restaurant(reservation)
 
     return BookingService.Reservations2JSON(reservations), 200
 
@@ -213,7 +216,7 @@ application = app.app
 if "GOUOUTSAFE_TEST" in os.environ and os.environ["GOUOUTSAFE_TEST"] == "1":
     db_session = init_db("sqlite:///tests/booking.db")
 else:
-    db_session = init_db("sqlite:///db/booking.db")
+    db_session = init_db("sqlite:///booking.db")
 app.add_api("swagger.yml")
 
 

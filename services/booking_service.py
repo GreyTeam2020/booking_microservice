@@ -3,7 +3,10 @@ from datetime import datetime, timedelta
 
 from flask import current_app
 from sqlalchemy import or_
+
+from app_constant import RESTAURANTS_MICROSERVICE_URL
 from database import Reservation
+from model.reservation_restaurant_model import ReservationRestaurantModel
 from utils.http_utils import HttpUtils
 
 
@@ -146,20 +149,54 @@ class BookingService:
         return True
 
     @staticmethod
-    def Reservation2JSON(reservation):
-        return {
-            "id": reservation.id,
-            "reservation_date": reservation.reservation_date,
-            "reservation_end": reservation.reservation_end,
-            "customer_id": reservation.customer_id,
-            "table_id": reservation.table_id,
-            "people_number": reservation.people_number,
-            "checkin": reservation.checkin
-        }
+    def Reservation2JSON(reservation, with_restaurant=False):
+        if not with_restaurant:
+            return {
+                "id": reservation.id,
+                "reservation_date": reservation.reservation_date,
+                "reservation_end": reservation.reservation_end,
+                "customer_id": reservation.customer_id,
+                "table_id": reservation.table_id,
+                "people_number": reservation.people_number,
+                "checkin": reservation.checkin
+            }
+        else:
+            current_app.logger.debug("-------------")
+            current_app.logger.debug(reservation)
+            current_app.logger.debug(reservation.table.id)
+            current_app.logger.debug(reservation.table.restaurant.id)
+            return {
+                "id": reservation.id,
+                "reservation_date": reservation.reservation_date,
+                "reservation_end": reservation.reservation_end,
+                "customer_id": reservation.customer_id,
+                "table": {
+                    "id": reservation.table.id,
+                    "name": reservation.table.name,
+                    "restaurant": {
+                        "id": reservation.table.restaurant.id,
+                        "name": reservation.table.restaurant.name,
+                    }
+                },
+                "people_number": reservation.people_number,
+                "checkin": reservation.checkin
+            }
 
     @staticmethod
     def Reservations2JSON(reservations):
+        current_app.logger.debug("I'm the translator, i got: {}".format(reservations))
         to_return = []
         for r in reservations:
-            to_return.append(BookingService.Reservation2JSON(r))
+            to_return.append(BookingService.Reservation2JSON(r, True))
+        current_app.logger.debug(to_return)
         return to_return
+
+    @staticmethod
+    def replace_with_restaurant(reservation):
+        response = HttpUtils.make_get_request("{}/table/{}".format(RESTAURANTS_MICROSERVICE_URL, reservation.table_id))
+
+        r2 = ReservationRestaurantModel()
+        r2.fill_from_Reservation(reservation)
+
+        r2.addTable(response)
+        return r2
