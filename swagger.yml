@@ -190,6 +190,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Result'
+  /book/{reservation_id}/checkin:
+    get:
+      tags:
+        - Book
+      summary: Checkin a reservation
+      operationId: app.check_in
+      parameters:
+        - name: reservation_id
+          in: path
+          description: Reservation's Unique identifier
+          required: true
+          example: 54
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+        404:
+          description: Reservation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
 components:
   schemas:
     RequestBooking:

@@ -221,6 +221,16 @@ def update_booking(reservation_id):
     return response, code
 
 
+def check_in(reservation_id):
+    reservation = db_session.query(Reservation).filter_by(id=reservation_id)
+    if reservation:
+        reservation.update({Reservation.checkin: True})
+        db_session.commit()
+        db_session.flush()
+        return {"code": 200, "message": "Success"}, 200
+    return HttpUtils.error_message(404, "Reservation not found")
+
+
 # --------- END API definition --------------------------
 logging.basicConfig(level=logging.DEBUG)
 app = connexion.App(__name__)
