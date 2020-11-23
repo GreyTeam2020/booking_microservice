@@ -17,6 +17,4 @@ class ReservationCustomerModel:
         self.table = table_model
 
     def addCustomer(self, customer):
-        customer_model = UserModel()
-        customer_model.fill_from_json(customer)
-        self.customer = customer_model
+        self.customer = customer
