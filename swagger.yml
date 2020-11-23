@@ -217,6 +217,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Result'
+  /book/stats/{restaurant_id}:
+    get:
+      tags:
+        - Restaurant Stats
+      summary: Get today reservations stats
+      operationId: app.people_in
+      parameters:
+        - name: restaurant_id
+          in: path
+          description: Restaurant's Unique identifier
+          required: true
+          example: 54
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stats'
 components:
   schemas:
     RequestBooking:
@@ -402,3 +423,22 @@ components:
           type: string
           default: Type of result
           example: "Message to describe what happen on server"
+    Stats:
+      required:
+        - lunch
+        - dinner
+        - now
+      type: object
+      properties:
+        lunch:
+          type: integer
+          description: Number of people booked for lunch
+          example: 2
+        dinner:
+          type: integer
+          description: Number of people booked for dinner
+          example: 4
+        now:
+          type: integer
+          description: Number of people in the restaurant
+          example: 1

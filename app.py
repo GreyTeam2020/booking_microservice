@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 import connexion
 from flask import request, current_app
+from sqlalchemy import extract
 
 from database import init_db, Reservation, Friend
 import logging
@@ -229,6 +230,74 @@ def check_in(reservation_id):
         db_session.flush()
         return {"code": 200, "message": "Success"}, 200
     return HttpUtils.error_message(404, "Reservation not found")
+
+
+def people_in(restaurant_id):
+    openings = RestaurantService.get_openings(restaurant_id)
+    if openings is None or len(openings) == 0:
+        return {"lunch": 0, "dinner": 0, "now": 0}
+
+    openings = BookingService.filter_openings(openings, datetime.today().weekday())[0]
+
+    openings_model = OpeningHoursModel()
+    openings_model.fill_from_json(openings)
+
+
+    tables = RestaurantService.get_tables(restaurant_id)
+    if tables is None or len(tables) == 0:
+        return {"lunch": 0, "dinner": 0, "now": 0}
+
+    tables_id = [table["id"] for table in tables]
+    current_app.logger.debug("TABLES IDs: {}".format(tables_id))
+
+    reservations_l = (
+        db_session.query(Reservation)
+            .filter(
+            Reservation.table_id.in_(tables_id),
+            extract("day", Reservation.reservation_date)
+            == extract("day", datetime.today()),
+            extract("month", Reservation.reservation_date)
+            == extract("month", datetime.today()),
+            extract("year", Reservation.reservation_date)
+            == extract("year", datetime.today()),
+            extract("hour", Reservation.reservation_date)
+            >= extract("hour", openings_model.open_lunch),
+            extract("hour", Reservation.reservation_date)
+            <= extract("hour", openings_model.close_lunch),
+        )
+            .all()
+    )
+
+    reservations_d = (
+        db_session.query(Reservation)
+            .filter(
+            Reservation.table_id.in_(tables_id),
+            extract("day", Reservation.reservation_date)
+            == extract("day", datetime.today()),
+            extract("month", Reservation.reservation_date)
+            == extract("month", datetime.today()),
+            extract("year", Reservation.reservation_date)
+            == extract("year", datetime.today()),
+            extract("hour", Reservation.reservation_date)
+            >= extract("hour", openings_model.open_dinner),
+            extract("hour", Reservation.reservation_date)
+            <= extract("hour", openings_model.close_dinner),
+        )
+            .all()
+    )
+
+    reservations_now = (
+        db_session.query(Reservation)
+            .filter(
+            Reservation.checkin is True,
+            Reservation.reservation_date <= datetime.now(),
+            Reservation.reservation_end >= datetime.now(),
+        )
+            .all()
+    )
+
+    current_app.logger.debug("End of queries")
+    return {"lunch": len(reservations_l), "dinner": len(reservations_d), "now": len(reservations_now)}, 200
 
 
 # --------- END API definition --------------------------
