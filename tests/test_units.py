@@ -208,3 +208,12 @@ class Test_Units:
         result = BookingService.check_restaurant_openings(openings[0], py_datetime)
         assert result[1] == 404
 
+
+    def test_reservation_to_json_ok(self):
+        reservation = Utils.insert_reservation()
+        reservation2 = Utils.insert_reservation(people_number=4)
+        all_reservations = [reservation, reservation2]
+
+        json_array = BookingService.reservations_to_json(all_reservations, what="simple")
+
+        assert len(all_reservations) == len(json_array)

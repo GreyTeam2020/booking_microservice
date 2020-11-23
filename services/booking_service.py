@@ -161,7 +161,7 @@ class BookingService:
                 "people_number": reservation.people_number,
                 "checkin": reservation.checkin
             }
-        elif what == "restaurant":
+        elif what == "restaurant": # pragma: nocover
             return {
                 "id": reservation.id,
                 "reservation_date": reservation.reservation_date,
@@ -178,7 +178,7 @@ class BookingService:
                 "people_number": reservation.people_number,
                 "checkin": reservation.checkin
             }
-        elif what == "customer":
+        elif what == "customer": # pragma: nocover
             return {
                 "id": reservation.id,
                 "reservation_date": reservation.reservation_date,
@@ -207,7 +207,7 @@ class BookingService:
         return to_return
 
     @staticmethod
-    def replace_with_restaurant(reservation):
+    def replace_with_restaurant(reservation): # pragma: nocover
         response = HttpUtils.make_get_request("{}/table/{}".format(RESTAURANTS_MICROSERVICE_URL, reservation.table_id))
 
         current_app.logger.debug("ok, adding")
@@ -219,7 +219,7 @@ class BookingService:
         return r2
 
     @staticmethod
-    def replace_with_customer(reservation):
+    def replace_with_customer(reservation): # pragma: nocover
         response = HttpUtils.make_get_request("{}/table/{}".format(RESTAURANTS_MICROSERVICE_URL, reservation.table_id))
 
         current_app.logger.debug("ok, adding")
