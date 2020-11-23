@@ -11,7 +11,7 @@ class UserService:
     def get_user_info(user_id: int):
         response = HttpUtils.make_get_request("{}/{}".format(USER_MICROSERVICE_URL, user_id))
         if response is None:
-            error_message(500, "Can't retrieve info about yourself")
+            return HttpUtils.error_message(500, "Can't retrieve info about yourself")
 
         user = UserModel()
         user.fill_from_json(response)

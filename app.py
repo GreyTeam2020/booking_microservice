@@ -208,6 +208,29 @@ def get_all_bookings(user_id=False, fromDate=False, toDate=False, restaurant_id=
 
     return BookingService.reservations_to_json(reservations), 200
 
+def get_all_bookings_restaurant(fromDate=False, toDate=False, restaurant_id=False):
+
+    reservations = db_session.query(Reservation)
+    tables = RestaurantService.get_tables(restaurant_id)
+    ints = [table["id"] for table in tables]
+    current_app.logger.debug("TABLES INTS: {}".format(ints))
+    reservations = reservations.filter(Reservation.table_id.in_(ints))
+
+    # Filtering stuff
+    if fromDate is not False:
+        reservations = reservations.filter(Reservation.reservation_date >= datetime.strptime(fromDate, "%Y-%m-%dT%H:%M:%SZ"))
+    if toDate is not False:
+        reservations = reservations.filter(Reservation.reservation_end <= datetime.strptime(toDate, "%Y-%m-%dT%H:%M:%SZ"))
+
+    reservations = reservations.all()
+    if reservations is None:
+        return HttpUtils.error_message(404, "No Reservations")
+
+    current_app.logger.debug("reservations len={}".format(len(reservations)))
+    for i, reservation in enumerate(reservations):
+        reservations[i] = BookingService.replace_with_customer(reservation)
+
+    return BookingService.reservations_to_json(reservations, "customer"), 200
 
 def update_booking(reservation_id):
     json = request.get_json()

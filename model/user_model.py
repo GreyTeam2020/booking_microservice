@@ -6,5 +6,6 @@ class UserModel:
         self.email = json_obj["email"]
         self.firstname = json_obj["firstname"]
         self.lastname = json_obj["lastname"]
+        self.phone = json_obj["phone"]
         self.is_positive = json_obj["is_positive"]
 

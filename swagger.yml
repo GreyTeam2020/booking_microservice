@@ -238,6 +238,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Stats'
+  /book/list/{restaurant_id}:
+    get:
+      tags:
+        - Restaurant Stats
+      summary: Get all reservations of a restaurant with customer infos
+      operationId: app.get_all_bookings_restaurant
+      parameters:
+        - name: restaurant_id
+          in: path
+          description: Restaurant's Unique identifier
+          required: true
+          example: 54
+          schema:
+            type: integer
+        - name: fromDate
+          in: query
+          description: Filtering for >= fromDate
+          required: false
+          example: 12
+          schema:
+            type: string
+            format: datetime
+        - name: toDate
+          in: query
+          description: Filtering for <= toDate
+          required: false
+          example: 12
+          schema:
+            type: string
+            format: datetime
+      responses:
+        200:
+          description: Return Books
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationWithTableAndCustomer'
+        404:
+          description: Reservation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
 components:
   schemas:
     RequestBooking:
@@ -377,6 +420,69 @@ components:
           type: boolean
           description: If customer entered the restaurant
           example: True
+    ReservationWithTableAndCustomer:
+      required:
+        - id
+        - reservation_date
+        - reservation_end
+        - customer
+        - table
+        - people_number
+        - checkin
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the new booking
+          example: 564
+        reservation_date:
+          type: string
+          format: date-time
+          description: Reservation datetime
+          example: "2021-07-21T20:30:00Z"
+        reservation_end:
+          type: string
+          format: date-time
+          description: Reservation end datetime
+          example: "2021-07-21T20:50:00Z"
+        customer:
+          type: object
+          $ref: '#/components/schemas/Customer'
+        table:
+          type: object
+          $ref: '#/components/schemas/TableNoRestaurant'
+        people_number:
+          type: integer
+          description: Number of the people in the booking
+          example: 3
+        checkin:
+          type: boolean
+          description: If customer entered the restaurant
+          example: True
+    Customer:
+      required:
+        - firstname
+        - lastname
+        - email
+        - phone
+      type: object
+      properties:
+        firstname:
+          type: string
+          description: Customer firstname
+          example: "John"
+        lastname:
+          type: string
+          description: Customer lastname
+          example: "Doe"
+        email:
+          type: string
+          description: Customer email
+          example: "john.doe@email.com"
+        phone:
+          type: string
+          description: Customer phone
+          example: "3405685421"
     Table:
       required:
         - id
@@ -395,6 +501,21 @@ components:
         restaurant:
           type: object
           $ref: '#/components/schemas/Restaurant'
+    TableNoRestaurant:
+      required:
+        - id
+      type: object
+      properties:
+        name:
+          maxLength: 100
+          minLength: 1
+          type: string
+          description: Name of the table
+          example: "Table name"
+        id:
+          type: integer
+          description: id of the table
+          example: 3
     Restaurant:
       required:
         - id

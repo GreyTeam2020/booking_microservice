@@ -6,7 +6,9 @@ from sqlalchemy import or_
 
 from app_constant import RESTAURANTS_MICROSERVICE_URL
 from database import Reservation
+from model.reservation_customer_model import ReservationCustomerModel
 from model.reservation_restaurant_model import ReservationRestaurantModel
+from services import UserService
 from utils.http_utils import HttpUtils
 
 
@@ -148,8 +150,8 @@ class BookingService:
         return True
 
     @staticmethod
-    def reservation_to_json(reservation, with_restaurant=False):
-        if not with_restaurant:
+    def reservation_to_json(reservation, what="simple"):
+        if what == "simple":
             return {
                 "id": reservation.id,
                 "reservation_date": reservation.reservation_date,
@@ -159,11 +161,7 @@ class BookingService:
                 "people_number": reservation.people_number,
                 "checkin": reservation.checkin
             }
-        else:
-            current_app.logger.debug("-------------")
-            current_app.logger.debug(reservation)
-            current_app.logger.debug(reservation.table.id)
-            current_app.logger.debug(reservation.table.restaurant.id)
+        elif what == "restaurant":
             return {
                 "id": reservation.id,
                 "reservation_date": reservation.reservation_date,
@@ -180,13 +178,31 @@ class BookingService:
                 "people_number": reservation.people_number,
                 "checkin": reservation.checkin
             }
+        elif what == "customer":
+            return {
+                "id": reservation.id,
+                "reservation_date": reservation.reservation_date,
+                "reservation_end": reservation.reservation_end,
+                "customer": {
+                    "firstname": reservation.customer.firstname,
+                    "lastname": reservation.customer.lastname,
+                    "email": reservation.customer.email,
+                    "phone": reservation.customer.phone
+                },
+                "table": {
+                    "id": reservation.table.id,
+                    "name": reservation.table.name
+                },
+                "people_number": reservation.people_number,
+                "checkin": reservation.checkin
+            }
 
     @staticmethod
-    def reservations_to_json(reservations):
+    def reservations_to_json(reservations, what="restaurant"):
         current_app.logger.debug("I'm the translator, i got: {}".format(reservations))
         to_return = []
         for r in reservations:
-            to_return.append(BookingService.reservation_to_json(r, True))
+            to_return.append(BookingService.reservation_to_json(r, what))
         current_app.logger.debug(to_return)
         return to_return
 
@@ -200,4 +216,19 @@ class BookingService:
 
         r2.addTable(response)
         current_app.logger.debug("added")
+        return r2
+
+    @staticmethod
+    def replace_with_customer(reservation):
+        response = HttpUtils.make_get_request("{}/table/{}".format(RESTAURANTS_MICROSERVICE_URL, reservation.table_id))
+
+        current_app.logger.debug("ok, adding")
+        r2 = ReservationCustomerModel()
+        r2.fill_from_Reservation(reservation)
+
+        r2.addTable(response)
+        current_app.logger.debug("added table")
+
+        customer = UserService.get_user_info(reservation.customer_id)
+        r2.addCustomer(customer)
         return r2
