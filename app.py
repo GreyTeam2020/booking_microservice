@@ -246,9 +246,9 @@ def update_booking(reservation_id):
 
 
 def check_in(reservation_id):
-    reservation = db_session.query(Reservation).filter_by(id=reservation_id)
-    if reservation:
-        reservation.update({Reservation.checkin: True})
+    reservation = db_session.query(Reservation).filter_by(id=reservation_id).first()
+    if reservation is not None:
+        reservation.checkin = True
         db_session.commit()
         db_session.flush()
         return {"code": 200, "message": "Success"}, 200

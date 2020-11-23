@@ -2,7 +2,12 @@
 omit =
     tests/fixtures/*
     model/*
+    services/restaurant_service.py
+    services/user_service.py
+    services/send_email_service.py
     app_costant.py
+    app.py
+    utils/http_utils.py
     setup.py
     services/__init__.py
     __init__.py
