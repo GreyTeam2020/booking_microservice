@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 import connexion
 from flask import request, current_app
+from sqlalchemy import extract
 
 from database import init_db, Reservation, Friend
 import logging
@@ -174,7 +175,7 @@ def get_booking(reservation_id):
     return BookingService.reservation_to_json(reservation), 200
 
 
-def get_all_bookings(user_id=False, fromDate=False, toDate=False):
+def get_all_bookings(user_id=False, fromDate=False, toDate=False, restaurant_id=False):
 
     reservations = db_session.query(Reservation)
     # Filtering stuff
@@ -184,20 +185,52 @@ def get_all_bookings(user_id=False, fromDate=False, toDate=False):
         reservations = reservations.filter(Reservation.reservation_date >= datetime.strptime(fromDate, "%Y-%m-%dT%H:%M:%SZ"))
     if toDate is not False:
         reservations = reservations.filter(Reservation.reservation_end <= datetime.strptime(toDate, "%Y-%m-%dT%H:%M:%SZ"))
+    if restaurant_id is not False:
+        tables = RestaurantService.get_tables(restaurant_id)
+        ints = [table["id"] for table in tables]
+        current_app.logger.debug("TABLES INTS: {}".format(ints))
+        reservations = reservations.filter(Reservation.table_id.in_(ints))
 
     reservations = reservations.all()
     if reservations is None:
         return HttpUtils.error_message(404, "No Reservations")
 
+    current_app.logger.debug("reservations len={}".format(len(reservations)))
     for i, reservation in enumerate(reservations):
         reservations[i] = BookingService.replace_with_restaurant(reservation)
-        reservation[i].people = []
-        friends = db_session.query(Friend).filter_by(reservation_id=reservation.id)
+        current_app.logger.debug("adding people")
+        reservations[i].people = []
+        current_app.logger.debug("added empty list")
+        friends = db_session.query(Friend).filter_by(reservation_id=reservation.id).all()
+        current_app.logger.debug("Got friends: {}".format(len(friends)))
         for friend in friends:
-            reservation[i].people.append(friend.email.strip())
+            reservations[i].people.append(friend.email.strip())
 
     return BookingService.reservations_to_json(reservations), 200
 
+def get_all_bookings_restaurant(fromDate=False, toDate=False, restaurant_id=False):
+
+    reservations = db_session.query(Reservation)
+    tables = RestaurantService.get_tables(restaurant_id)
+    ints = [table["id"] for table in tables]
+    current_app.logger.debug("TABLES INTS: {}".format(ints))
+    reservations = reservations.filter(Reservation.table_id.in_(ints))
+
+    # Filtering stuff
+    if fromDate is not False:
+        reservations = reservations.filter(Reservation.reservation_date >= datetime.strptime(fromDate, "%Y-%m-%dT%H:%M:%SZ"))
+    if toDate is not False:
+        reservations = reservations.filter(Reservation.reservation_end <= datetime.strptime(toDate, "%Y-%m-%dT%H:%M:%SZ"))
+
+    reservations = reservations.all()
+    if reservations is None:
+        return HttpUtils.error_message(404, "No Reservations")
+
+    current_app.logger.debug("reservations len={}".format(len(reservations)))
+    for i, reservation in enumerate(reservations):
+        reservations[i] = BookingService.replace_with_customer(reservation)
+
+    return BookingService.reservations_to_json(reservations, "customer"), 200
 
 def update_booking(reservation_id):
     json = request.get_json()
@@ -210,6 +243,84 @@ def update_booking(reservation_id):
     if code != 200:
         return HttpUtils.error_message(500, "Internal Error, the booking has been deleted, please replace it")
     return response, code
+
+
+def check_in(reservation_id):
+    reservation = db_session.query(Reservation).filter_by(id=reservation_id)
+    if reservation:
+        reservation.update({Reservation.checkin: True})
+        db_session.commit()
+        db_session.flush()
+        return {"code": 200, "message": "Success"}, 200
+    return HttpUtils.error_message(404, "Reservation not found")
+
+
+def people_in(restaurant_id):
+    openings = RestaurantService.get_openings(restaurant_id)
+    if openings is None or len(openings) == 0:
+        return {"lunch": 0, "dinner": 0, "now": 0}
+
+    openings = BookingService.filter_openings(openings, datetime.today().weekday())[0]
+
+    openings_model = OpeningHoursModel()
+    openings_model.fill_from_json(openings)
+
+
+    tables = RestaurantService.get_tables(restaurant_id)
+    if tables is None or len(tables) == 0:
+        return {"lunch": 0, "dinner": 0, "now": 0}
+
+    tables_id = [table["id"] for table in tables]
+    current_app.logger.debug("TABLES IDs: {}".format(tables_id))
+
+    reservations_l = (
+        db_session.query(Reservation)
+            .filter(
+            Reservation.table_id.in_(tables_id),
+            extract("day", Reservation.reservation_date)
+            == extract("day", datetime.today()),
+            extract("month", Reservation.reservation_date)
+            == extract("month", datetime.today()),
+            extract("year", Reservation.reservation_date)
+            == extract("year", datetime.today()),
+            extract("hour", Reservation.reservation_date)
+            >= extract("hour", openings_model.open_lunch),
+            extract("hour", Reservation.reservation_date)
+            <= extract("hour", openings_model.close_lunch),
+        )
+            .all()
+    )
+
+    reservations_d = (
+        db_session.query(Reservation)
+            .filter(
+            Reservation.table_id.in_(tables_id),
+            extract("day", Reservation.reservation_date)
+            == extract("day", datetime.today()),
+            extract("month", Reservation.reservation_date)
+            == extract("month", datetime.today()),
+            extract("year", Reservation.reservation_date)
+            == extract("year", datetime.today()),
+            extract("hour", Reservation.reservation_date)
+            >= extract("hour", openings_model.open_dinner),
+            extract("hour", Reservation.reservation_date)
+            <= extract("hour", openings_model.close_dinner),
+        )
+            .all()
+    )
+
+    reservations_now = (
+        db_session.query(Reservation)
+            .filter(
+            Reservation.checkin is True,
+            Reservation.reservation_date <= datetime.now(),
+            Reservation.reservation_end >= datetime.now(),
+        )
+            .all()
+    )
+
+    current_app.logger.debug("End of queries")
+    return {"lunch": len(reservations_l), "dinner": len(reservations_d), "now": len(reservations_now)}, 200
 
 
 # --------- END API definition --------------------------
