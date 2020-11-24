@@ -151,6 +151,9 @@ class BookingService:
 
     @staticmethod
     def reservation_to_json(reservation, what="simple"):
+        current_app.logger.debug("JSON parse: type={}".format(what))
+        current_app.logger.debug("JSON parse: type={}".format(what))
+
         if what == "simple":
             return {
                 "id": reservation.id,
@@ -177,7 +180,8 @@ class BookingService:
                     }
                 },
                 "people_number": reservation.people_number,
-                "checkin": reservation.checkin
+                "checkin": reservation.checkin,
+                "people": reservation.people
             }
         elif what == "customer": # pragma: nocover
             return {
