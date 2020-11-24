@@ -176,7 +176,8 @@ class BookingService:
                     }
                 },
                 "people_number": reservation.people_number,
-                "checkin": reservation.checkin
+                "checkin": reservation.checkin,
+                "people": reservation.people
             }
         elif what == "customer": # pragma: nocover
             return {
