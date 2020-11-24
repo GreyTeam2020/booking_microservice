@@ -180,12 +180,16 @@ def get_all_bookings(user_id=False, fromDate=False, toDate=False, restaurant_id=
     reservations = db_session.query(Reservation)
     # Filtering stuff
     if user_id is not False:
+        current_app.logger.debug("Adding reservation with filter by user id: {}".format(user_id))
         reservations = reservations.filter(Reservation.customer_id == user_id)
     if fromDate is not False:
+        current_app.logger.debug("Adding reservation with filter from date: {}".format(fromDate))
         reservations = reservations.filter(Reservation.reservation_date >= datetime.strptime(fromDate, "%Y-%m-%dT%H:%M:%SZ"))
     if toDate is not False:
+        current_app.logger.debug("Adding reservation with filter to date: {}".format(toDate))
         reservations = reservations.filter(Reservation.reservation_end <= datetime.strptime(toDate, "%Y-%m-%dT%H:%M:%SZ"))
     if restaurant_id is not False:
+        current_app.logger.debug("Adding reservation with filter by restaurant id: {}".format(restaurant_id))
         tables = RestaurantService.get_tables(restaurant_id)
         ints = [table["id"] for table in tables]
         current_app.logger.debug("TABLES INTS: {}".format(ints))
