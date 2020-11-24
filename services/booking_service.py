@@ -159,7 +159,8 @@ class BookingService:
                 "customer_id": reservation.customer_id,
                 "table_id": reservation.table_id,
                 "people_number": reservation.people_number,
-                "checkin": reservation.checkin
+                "checkin": reservation.checkin,
+                "people": reservation.people
             }
         elif what == "restaurant": # pragma: nocover
             return {
