@@ -16,7 +16,6 @@ from services.booking_service import BookingService
 from services.restaurant_service import RestaurantService
 from services.send_email_service import SendEmailService
 from utils.http_utils import HttpUtils
-from app_constant import RESTAURANTS_MICROSERVICE_URL
 
 db_session = None
 
@@ -52,7 +51,7 @@ def create_booking(private=False):
             return HttpUtils.error_message(400, "You need to specify ONE mail for each person")
         current_app.logger.debug("Friends: {}".format(str(splitted_friends)))
     # if user wants to book in the past..
-    if py_datetime < datetime.now():
+    if py_datetime < datetime.now() and "is_debug" not in json:
         return HttpUtils.error_message(400, "You can not book in the past!")
 
     # check if the user is positive
