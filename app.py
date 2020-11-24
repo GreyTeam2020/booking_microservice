@@ -202,13 +202,14 @@ def get_all_bookings(user_id=False, fromDate=False, toDate=False, restaurant_id=
     for i, reservation in enumerate(reservations):
         reservations[i] = BookingService.replace_with_restaurant(reservation)
         current_app.logger.debug("adding people")
-        reservations[i].people = []
+        listfriends = []
         current_app.logger.debug("added empty list")
         friends = db_session.query(Friend).filter_by(reservation_id=reservation.id).all()
         current_app.logger.debug("Got friends: {}".format(len(friends)))
         for friend in friends:
-            reservations[i].people.append(friend.email.strip())
-
+           listfriends.append(friend.email.strip())
+        current_app.logger.debug("Frinds: {}".format(listfriends))
+        reservations[i].people = listfriends
     return BookingService.reservations_to_json(reservations), 200
 
 def get_all_bookings_restaurant(fromDate=False, toDate=False, restaurant_id=False):
