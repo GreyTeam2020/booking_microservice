@@ -1,7 +1,4 @@
-
-
 class RestaurantModel:
-
     def fill_from_json(self, json_obj):
         self.avg_time = json_obj["avg_time"]
         self.covid_measures = json_obj["covid_measures"]

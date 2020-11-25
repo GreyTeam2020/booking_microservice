@@ -48,7 +48,9 @@ def create_booking(private=False):
     if people_number > 1:
         splitted_friends = raw_friends.split(";")
         if len(splitted_friends) != (people_number - 1):
-            return HttpUtils.error_message(400, "You need to specify ONE mail for each person")
+            return HttpUtils.error_message(
+                400, "You need to specify ONE mail for each person"
+            )
         current_app.logger.debug("Friends: {}".format(str(splitted_friends)))
     # if user wants to book in the past..
     if py_datetime < datetime.now() and "is_debug" not in json:
@@ -71,7 +73,7 @@ def create_booking(private=False):
     opening_hour_json = BookingService.filter_openings(openings, week_day=week_day)[0]
     current_app.logger.debug("Got openings this day: {}".format(opening_hour_json))
     # the restaurant is closed
-    if opening_hour_json is None: #TODO: Test
+    if opening_hour_json is None:  # TODO: Test
         print("No Opening hour")
         return HttpUtils.error_message(404, "The restaurant is closed")
 
@@ -108,10 +110,14 @@ def create_booking(private=False):
     if all_table_list is None:
         return HttpUtils.error_message(500, "Can't retrieve restaurant tables")
 
-    free_tables = BookingService.get_free_tables(all_table_list, people_number, py_datetime, avg_time)
+    free_tables = BookingService.get_free_tables(
+        all_table_list, people_number, py_datetime, avg_time
+    )
 
     # if there are tables available.. get the one with minimum max_seats
-    current_app.logger.debug("OK, There are {} tables available".format(len(free_tables)))
+    current_app.logger.debug(
+        "OK, There are {} tables available".format(len(free_tables))
+    )
     if len(free_tables) > 0:
         chosen_table = BookingService.get_min_seats_table(free_tables)
         current_app.logger.debug("OK, table {} has been chosen".format(chosen_table))
@@ -139,17 +145,28 @@ def create_booking(private=False):
             splitted_friends = []
         db_session.commit()
 
-        SendEmailService.booking_confirmation(current_user.email, current_user.firstname, restaurant_name, splitted_friends, new_reservation.reservation_date)
+        SendEmailService.booking_confirmation(
+            current_user.email,
+            current_user.firstname,
+            restaurant_name,
+            splitted_friends,
+            new_reservation.reservation_date,
+        )
 
-        return {"id": new_reservation.id, "restaurant_name": restaurant_name, "table_name": table_name}, 200
+        return {
+            "id": new_reservation.id,
+            "restaurant_name": restaurant_name,
+            "table_name": table_name,
+        }, 200
     else:
         return HttpUtils.error_message(404, "No tables available")
+
 
 def delete_booking(reservation_id, user_id):
     query = (
         db_session.query(Reservation)
-            .filter_by(id=reservation_id)
-            .filter_by(customer_id=user_id)
+        .filter_by(id=reservation_id)
+        .filter_by(customer_id=user_id)
     )
 
     to_delete = query.first()
@@ -162,11 +179,7 @@ def delete_booking(reservation_id, user_id):
 
 
 def get_booking(reservation_id):
-    reservation = (
-        db_session.query(Reservation)
-            .filter_by(id=reservation_id)
-            .first()
-    )
+    reservation = db_session.query(Reservation).filter_by(id=reservation_id).first()
 
     if reservation is None:
         return HttpUtils.error_message(404, "Reservation not Found")
@@ -179,16 +192,30 @@ def get_all_bookings(user_id=False, fromDate=False, toDate=False, restaurant_id=
     reservations = db_session.query(Reservation)
     # Filtering stuff
     if user_id is not False:
-        current_app.logger.debug("Adding reservation with filter by user id: {}".format(user_id))
+        current_app.logger.debug(
+            "Adding reservation with filter by user id: {}".format(user_id)
+        )
         reservations = reservations.filter(Reservation.customer_id == user_id)
     if fromDate is not False:
-        current_app.logger.debug("Adding reservation with filter from date: {}".format(fromDate))
-        reservations = reservations.filter(Reservation.reservation_date >= datetime.strptime(fromDate, "%Y-%m-%dT%H:%M:%SZ"))
+        current_app.logger.debug(
+            "Adding reservation with filter from date: {}".format(fromDate)
+        )
+        reservations = reservations.filter(
+            Reservation.reservation_date
+            >= datetime.strptime(fromDate, "%Y-%m-%dT%H:%M:%SZ")
+        )
     if toDate is not False:
-        current_app.logger.debug("Adding reservation with filter to date: {}".format(toDate))
-        reservations = reservations.filter(Reservation.reservation_end <= datetime.strptime(toDate, "%Y-%m-%dT%H:%M:%SZ"))
+        current_app.logger.debug(
+            "Adding reservation with filter to date: {}".format(toDate)
+        )
+        reservations = reservations.filter(
+            Reservation.reservation_end
+            <= datetime.strptime(toDate, "%Y-%m-%dT%H:%M:%SZ")
+        )
     if restaurant_id is not False:
-        current_app.logger.debug("Adding reservation with filter by restaurant id: {}".format(restaurant_id))
+        current_app.logger.debug(
+            "Adding reservation with filter by restaurant id: {}".format(restaurant_id)
+        )
         tables = RestaurantService.get_tables(restaurant_id)
         ints = [table["id"] for table in tables]
         current_app.logger.debug("TABLES INTS: {}".format(ints))
@@ -204,13 +231,16 @@ def get_all_bookings(user_id=False, fromDate=False, toDate=False, restaurant_id=
         current_app.logger.debug("adding people")
         listfriends = []
         current_app.logger.debug("added empty list")
-        friends = db_session.query(Friend).filter_by(reservation_id=reservation.id).all()
+        friends = (
+            db_session.query(Friend).filter_by(reservation_id=reservation.id).all()
+        )
         current_app.logger.debug("Got friends: {}".format(len(friends)))
         for friend in friends:
-           listfriends.append(friend.email.strip())
+            listfriends.append(friend.email.strip())
         current_app.logger.debug("Frinds: {}".format(listfriends))
         reservations[i].people = listfriends
     return BookingService.reservations_to_json(reservations), 200
+
 
 def get_all_bookings_restaurant(fromDate=False, toDate=False, restaurant_id=False):
 
@@ -222,9 +252,15 @@ def get_all_bookings_restaurant(fromDate=False, toDate=False, restaurant_id=Fals
 
     # Filtering stuff
     if fromDate is not False:
-        reservations = reservations.filter(Reservation.reservation_date >= datetime.strptime(fromDate, "%Y-%m-%dT%H:%M:%SZ"))
+        reservations = reservations.filter(
+            Reservation.reservation_date
+            >= datetime.strptime(fromDate, "%Y-%m-%dT%H:%M:%SZ")
+        )
     if toDate is not False:
-        reservations = reservations.filter(Reservation.reservation_end <= datetime.strptime(toDate, "%Y-%m-%dT%H:%M:%SZ"))
+        reservations = reservations.filter(
+            Reservation.reservation_end
+            <= datetime.strptime(toDate, "%Y-%m-%dT%H:%M:%SZ")
+        )
 
     reservations = reservations.all()
     if reservations is None:
@@ -236,6 +272,7 @@ def get_all_bookings_restaurant(fromDate=False, toDate=False, restaurant_id=Fals
 
     return BookingService.reservations_to_json(reservations, "customer"), 200
 
+
 def update_booking(reservation_id):
     json = request.get_json()
 
@@ -245,7 +282,9 @@ def update_booking(reservation_id):
 
     response, code = create_booking(json)
     if code != 200:
-        return HttpUtils.error_message(500, "Internal Error, the booking has been deleted, please replace it")
+        return HttpUtils.error_message(
+            500, "Internal Error, the booking has been deleted, please replace it"
+        )
     return response, code
 
 
@@ -269,7 +308,6 @@ def people_in(restaurant_id):
     openings_model = OpeningHoursModel()
     openings_model.fill_from_json(openings)
 
-
     tables = RestaurantService.get_tables(restaurant_id)
     if tables is None or len(tables) == 0:
         return {"lunch": 0, "dinner": 0, "now": 0}
@@ -279,7 +317,7 @@ def people_in(restaurant_id):
 
     reservations_l = (
         db_session.query(Reservation)
-            .filter(
+        .filter(
             Reservation.table_id.in_(tables_id),
             extract("day", Reservation.reservation_date)
             == extract("day", datetime.today()),
@@ -292,12 +330,12 @@ def people_in(restaurant_id):
             extract("hour", Reservation.reservation_date)
             <= extract("hour", openings_model.close_lunch),
         )
-            .all()
+        .all()
     )
 
     reservations_d = (
         db_session.query(Reservation)
-            .filter(
+        .filter(
             Reservation.table_id.in_(tables_id),
             extract("day", Reservation.reservation_date)
             == extract("day", datetime.today()),
@@ -310,21 +348,25 @@ def people_in(restaurant_id):
             extract("hour", Reservation.reservation_date)
             <= extract("hour", openings_model.close_dinner),
         )
-            .all()
+        .all()
     )
 
     reservations_now = (
         db_session.query(Reservation)
-            .filter(
+        .filter(
             Reservation.checkin is True,
             Reservation.reservation_date <= datetime.now(),
             Reservation.reservation_end >= datetime.now(),
         )
-            .all()
+        .all()
     )
 
     current_app.logger.debug("End of queries")
-    return {"lunch": len(reservations_l), "dinner": len(reservations_d), "now": len(reservations_now)}, 200
+    return {
+        "lunch": len(reservations_l),
+        "dinner": len(reservations_d),
+        "now": len(reservations_now),
+    }, 200
 
 
 # --------- END API definition --------------------------

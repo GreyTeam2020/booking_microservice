@@ -3,7 +3,6 @@ from model.user_model import UserModel
 
 
 class ReservationCustomerModel:
-
     def fill_from_Reservation(self, reservation):
         self.checkin = reservation.checkin
         self.id = reservation.id

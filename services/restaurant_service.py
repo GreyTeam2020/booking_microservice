@@ -10,18 +10,24 @@ class RestaurantService:
 
     @staticmethod
     def get_tables(restaurant_id: int):
-        response = HttpUtils.make_get_request("{}/{}/tables".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id))
+        response = HttpUtils.make_get_request(
+            "{}/{}/tables".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        )
         if response is None:
             return None
         return response["tables"]
 
     @staticmethod
     def get_openings(restaurant_id: int):
-        response = HttpUtils.make_get_request("{}/{}/openings".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id))
+        response = HttpUtils.make_get_request(
+            "{}/{}/openings".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        )
         if response is None:
             return None
         return response["openings"]
 
     @staticmethod
     def get_info(restaurant_id: int):
-        return HttpUtils.make_get_request("{}/{}".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id))
+        return HttpUtils.make_get_request(
+            "{}/{}".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        )
