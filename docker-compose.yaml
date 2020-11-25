@@ -8,3 +8,5 @@ services:
             - "5002:5002"
         expose:
             - "5002"
+        volumes:
+            - .:/code
