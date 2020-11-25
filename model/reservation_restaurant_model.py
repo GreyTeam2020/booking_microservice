@@ -2,7 +2,6 @@ from model.table_model import TableModel
 
 
 class ReservationRestaurantModel:
-
     def fill_from_Reservation(self, reservation):
         self.checkin = reservation.checkin
         self.customer_id = reservation.customer_id

@@ -20,7 +20,7 @@ class BookingService:
     @staticmethod
     def filter_openings(openings, week_day=None):
         if week_day is not None:
-            openings = [obj for obj in openings if (obj['week_day'] == week_day)]
+            openings = [obj for obj in openings if (obj["week_day"] == week_day)]
         return openings
 
     @staticmethod
@@ -42,14 +42,16 @@ class BookingService:
         return "NO_NAME"
 
     @staticmethod
-    def get_free_tables(tables, people_number: int, py_datetime: datetime, avg_time: int):
+    def get_free_tables(
+        tables, people_number: int, py_datetime: datetime, avg_time: int
+    ):
         db_session = current_app.config["DB_SESSION"]
         table_list = BookingService.filter_table_min_seat(tables, people_number)
         ints = [table["id"] for table in table_list]
 
         reservations = (
             db_session.query(Reservation)
-                .filter(
+            .filter(
                 or_(
                     Reservation.reservation_date.between(
                         py_datetime, py_datetime + timedelta(minutes=avg_time)
@@ -59,7 +61,7 @@ class BookingService:
                     ),
                 )
             )
-                .filter(Reservation.table_id.in_(ints))
+            .filter(Reservation.table_id.in_(ints))
         ).all()
         booked_tables = [reservation.table_id for reservation in reservations]
 
@@ -112,13 +114,13 @@ class BookingService:
                 )
 
             if (
-                    py_datetime > close_dinner_projection
-                    or py_datetime < open_dinner_projection
+                py_datetime > close_dinner_projection
+                or py_datetime < open_dinner_projection
             ):
                 return HttpUtils.error_message(404, "The restaurant is closed")
 
         if (opening_hour.open_dinner is None or opening_hour.close_dinner is None) and (
-                only_time < opening_hour.open_lunch or only_time > opening_hour.close_lunch
+            only_time < opening_hour.open_lunch or only_time > opening_hour.close_lunch
         ):
             return HttpUtils.error_message(404, "The restaurant is closed")
 
@@ -132,8 +134,8 @@ class BookingService:
                 else:
                     return HttpUtils.error_message(404, "The restaurant is closed")
             if (
-                    only_time < opening_hour.open_dinner
-                    and only_time > opening_hour.close_lunch
+                only_time < opening_hour.open_dinner
+                and only_time > opening_hour.close_lunch
             ):
                 return HttpUtils.error_message(404, "The restaurant is closed")
             if opening_hour.close_dinner < opening_hour.open_dinner:
@@ -159,9 +161,9 @@ class BookingService:
                 "customer_id": reservation.customer_id,
                 "table_id": reservation.table_id,
                 "people_number": reservation.people_number,
-                "checkin": reservation.checkin
+                "checkin": reservation.checkin,
             }
-        elif what == "restaurant": # pragma: nocover
+        elif what == "restaurant":  # pragma: nocover
             return {
                 "id": reservation.id,
                 "reservation_date": reservation.reservation_date,
@@ -173,13 +175,13 @@ class BookingService:
                     "restaurant": {
                         "id": reservation.table.restaurant.id,
                         "name": reservation.table.restaurant.name,
-                    }
+                    },
                 },
                 "people_number": reservation.people_number,
                 "checkin": reservation.checkin,
-                "people": reservation.people
+                "people": reservation.people,
             }
-        elif what == "customer": # pragma: nocover
+        elif what == "customer":  # pragma: nocover
             return {
                 "id": reservation.id,
                 "reservation_date": reservation.reservation_date,
@@ -188,14 +190,11 @@ class BookingService:
                     "firstname": reservation.customer.firstname,
                     "lastname": reservation.customer.lastname,
                     "email": reservation.customer.email,
-                    "phone": reservation.customer.phone
+                    "phone": reservation.customer.phone,
                 },
-                "table": {
-                    "id": reservation.table.id,
-                    "name": reservation.table.name
-                },
+                "table": {"id": reservation.table.id, "name": reservation.table.name},
                 "people_number": reservation.people_number,
-                "checkin": reservation.checkin
+                "checkin": reservation.checkin,
             }
 
     @staticmethod
@@ -208,8 +207,10 @@ class BookingService:
         return to_return
 
     @staticmethod
-    def replace_with_restaurant(reservation): # pragma: nocover
-        response = HttpUtils.make_get_request("{}/table/{}".format(RESTAURANTS_MICROSERVICE_URL, reservation.table_id))
+    def replace_with_restaurant(reservation):  # pragma: nocover
+        response = HttpUtils.make_get_request(
+            "{}/table/{}".format(RESTAURANTS_MICROSERVICE_URL, reservation.table_id)
+        )
 
         current_app.logger.debug("ok, adding")
         r2 = ReservationRestaurantModel()
@@ -220,8 +221,10 @@ class BookingService:
         return r2
 
     @staticmethod
-    def replace_with_customer(reservation): # pragma: nocover
-        response = HttpUtils.make_get_request("{}/table/{}".format(RESTAURANTS_MICROSERVICE_URL, reservation.table_id))
+    def replace_with_customer(reservation):  # pragma: nocover
+        response = HttpUtils.make_get_request(
+            "{}/table/{}".format(RESTAURANTS_MICROSERVICE_URL, reservation.table_id)
+        )
 
         current_app.logger.debug("ok, adding")
         r2 = ReservationCustomerModel()

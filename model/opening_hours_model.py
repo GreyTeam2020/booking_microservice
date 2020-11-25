@@ -4,7 +4,6 @@ from flask import current_app
 
 
 class OpeningHoursModel:
-
     def fill_from_json(self, json_obj):
         self.close_dinner = datetime.strptime(json_obj["close_dinner"], "%H:%M").time()
         self.close_lunch = datetime.strptime(json_obj["close_lunch"], "%H:%M").time()

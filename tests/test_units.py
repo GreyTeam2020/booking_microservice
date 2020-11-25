@@ -9,6 +9,7 @@ class Test_Units:
     This test include the unit testing that
     help us to test the single functions behaviour
     """
+
     def test_check_utils_functions(self):
         tables = Utils.create_tables_json()
 
@@ -16,7 +17,6 @@ class Test_Units:
         assert Utils.check_number_of_reseservation() == 1
         Utils.delete_all_reservations()
         assert Utils.check_number_of_reseservation() == 0
-
 
     def test_filter_openings_ok(self):
         openings = Utils.create_openings_json()
@@ -29,7 +29,6 @@ class Test_Units:
 
         result = BookingService.filter_openings(openings, week_day=2)
         assert len(result) == 0
-
 
     def test_fitler_table_min_seats_ok(self):
         tables = Utils.create_tables_json()
@@ -68,7 +67,7 @@ class Test_Units:
         py_datetime = datetime.datetime(year=2021, month=4, day=27, hour=12, minute=30)
         free_tables = BookingService.get_free_tables(tables, 4, py_datetime, 30)
 
-        #STILL TWO TABLES FREE
+        # STILL TWO TABLES FREE
         assert len(free_tables) == 2
 
         Utils.delete_all_reservations()
@@ -82,7 +81,7 @@ class Test_Units:
         py_datetime = datetime.datetime(year=2021, month=4, day=27, hour=12, minute=30)
         free_tables = BookingService.get_free_tables(tables, 4, py_datetime, 30)
 
-        #NO MORE TABLES
+        # NO MORE TABLES
         assert len(free_tables) != 1
 
         Utils.delete_all_reservations()
@@ -97,14 +96,14 @@ class Test_Units:
         openings = Utils.create_openings_json()
         py_datetime = datetime.datetime(year=2021, month=4, day=27, hour=12, minute=30)
 
-        #filter opening by week_day
+        # filter opening by week_day
         opening = BookingService.filter_openings(openings, py_datetime.weekday())
-        assert len (opening) == 1
+        assert len(opening) == 1
 
-        #transform opening found in a OpeningHourModel
+        # transform opening found in a OpeningHourModel
         openings = Utils.openings_json_to_model(opening)
 
-        #check if the restaurant is open
+        # check if the restaurant is open
         result = BookingService.check_restaurant_openings(openings[0], py_datetime)
         assert result == True
 
@@ -112,17 +111,17 @@ class Test_Units:
         openings = Utils.create_openings_json()
         py_datetime = datetime.datetime(year=2021, month=4, day=27, hour=12, minute=30)
 
-        #filter opening by week_day
+        # filter opening by week_day
         opening = BookingService.filter_openings(openings, py_datetime.weekday())
-        assert len (opening) == 1
+        assert len(opening) == 1
 
-        #transform opening found in a OpeningHourModel
+        # transform opening found in a OpeningHourModel
         openings = Utils.openings_json_to_model(opening)
-        #test case: no luch no dinner
+        # test case: no luch no dinner
         openings[0].open_lunch = None
         openings[0].open_dinner = None
 
-        #check if the restaurant is open
+        # check if the restaurant is open
         result = BookingService.check_restaurant_openings(openings[0], py_datetime)
         assert result[1] == 404
 
@@ -130,16 +129,16 @@ class Test_Units:
         openings = Utils.create_openings_json()
         py_datetime = datetime.datetime(year=2021, month=4, day=27, hour=23, minute=30)
 
-        #filter opening by week_day
+        # filter opening by week_day
         opening = BookingService.filter_openings(openings, py_datetime.weekday())
-        assert len (opening) == 1
+        assert len(opening) == 1
 
-        #transform opening found in a OpeningHourModel
+        # transform opening found in a OpeningHourModel
         openings = Utils.openings_json_to_model(opening)
-        #test case: open dinner but py_datetime > close_dinner
+        # test case: open dinner but py_datetime > close_dinner
         openings[0].open_lunch = None
 
-        #check if the restaurant is open
+        # check if the restaurant is open
         result = BookingService.check_restaurant_openings(openings[0], py_datetime)
         assert result[1] == 404
 
@@ -147,16 +146,16 @@ class Test_Units:
         openings = Utils.create_openings_json()
         py_datetime = datetime.datetime(year=2021, month=4, day=27, hour=17, minute=30)
 
-        #filter opening by week_day
+        # filter opening by week_day
         opening = BookingService.filter_openings(openings, py_datetime.weekday())
-        assert len (opening) == 1
+        assert len(opening) == 1
 
-        #transform opening found in a OpeningHourModel
+        # transform opening found in a OpeningHourModel
         openings = Utils.openings_json_to_model(opening)
-        #test case: close dinner and py_datetime > close_lunch
+        # test case: close dinner and py_datetime > close_lunch
         openings[0].close_dinner = None
 
-        #check if the restaurant is open
+        # check if the restaurant is open
         result = BookingService.check_restaurant_openings(openings[0], py_datetime)
         assert result[1] == 404
 
@@ -164,15 +163,15 @@ class Test_Units:
         openings = Utils.create_openings_json()
         py_datetime = datetime.datetime(year=2021, month=4, day=27, hour=23, minute=30)
 
-        #filter opening by week_day
+        # filter opening by week_day
         opening = BookingService.filter_openings(openings, py_datetime.weekday())
-        assert len (opening) == 1
+        assert len(opening) == 1
 
-        #transform opening found in a OpeningHourModel
+        # transform opening found in a OpeningHourModel
         openings = Utils.openings_json_to_model(opening)
-        #test case: always open py_datetime > close_dinner
+        # test case: always open py_datetime > close_dinner
 
-        #check if the restaurant is open
+        # check if the restaurant is open
         result = BookingService.check_restaurant_openings(openings[0], py_datetime)
         assert result[1] == 404
 
@@ -180,15 +179,15 @@ class Test_Units:
         openings = Utils.create_openings_json()
         py_datetime = datetime.datetime(year=2021, month=4, day=27, hour=17, minute=30)
 
-        #filter opening by week_day
+        # filter opening by week_day
         opening = BookingService.filter_openings(openings, py_datetime.weekday())
-        assert len (opening) == 1
+        assert len(opening) == 1
 
-        #transform opening found in a OpeningHourModel
+        # transform opening found in a OpeningHourModel
         openings = Utils.openings_json_to_model(opening)
-        #test case: always open py_datetime > close_lunch
+        # test case: always open py_datetime > close_lunch
 
-        #check if the restaurant is open
+        # check if the restaurant is open
         result = BookingService.check_restaurant_openings(openings[0], py_datetime)
         assert result[1] == 404
 
@@ -196,24 +195,25 @@ class Test_Units:
         openings = Utils.create_openings_json()
         py_datetime = datetime.datetime(year=2021, month=4, day=27, hour=10, minute=30)
 
-        #filter opening by week_day
+        # filter opening by week_day
         opening = BookingService.filter_openings(openings, py_datetime.weekday())
-        assert len (opening) == 1
+        assert len(opening) == 1
 
-        #transform opening found in a OpeningHourModel
+        # transform opening found in a OpeningHourModel
         openings = Utils.openings_json_to_model(opening)
-        #test case: always open py_datetime < open_lunch
+        # test case: always open py_datetime < open_lunch
 
-        #check if the restaurant is open
+        # check if the restaurant is open
         result = BookingService.check_restaurant_openings(openings[0], py_datetime)
         assert result[1] == 404
-
 
     def test_reservation_to_json_ok(self):
         reservation = Utils.insert_reservation()
         reservation2 = Utils.insert_reservation(people_number=4)
         all_reservations = [reservation, reservation2]
 
-        json_array = BookingService.reservations_to_json(all_reservations, what="simple")
+        json_array = BookingService.reservations_to_json(
+            all_reservations, what="simple"
+        )
 
         assert len(all_reservations) == len(json_array)

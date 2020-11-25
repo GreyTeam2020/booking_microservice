@@ -3,6 +3,7 @@ from database import Reservation, Friend
 from model.opening_hours_model import OpeningHoursModel
 import datetime
 
+
 class Utils:
     """
     This class contains som utils to testing well the system
@@ -16,81 +17,96 @@ class Utils:
 
     @staticmethod
     def create_openings_json():
-        return ([{
-            "week_day": 1,
-            "open_lunch": "11:30",
-            "close_lunch": "15:30",
-            "open_dinner": "19:00",
-            "close_dinner": "22:00",
-            "restaurant_id": "1",
-        },{
-            "week_day": 3,
-            "open_lunch": "11:30",
-            "close_lunch": "15:30",
-            "open_dinner": "19:00",
-            "close_dinner": "22:00",
-            "restaurant_id": "1",
-        },{
-            "week_day": 5,
-            "open_lunch": "11:30",
-            "close_lunch": "15:30",
-            "open_dinner": "19:00",
-            "close_dinner": "22:00",
-            "restaurant_id": "1",
-        }
-        ])
+        return [
+            {
+                "week_day": 1,
+                "open_lunch": "11:30",
+                "close_lunch": "15:30",
+                "open_dinner": "19:00",
+                "close_dinner": "22:00",
+                "restaurant_id": "1",
+            },
+            {
+                "week_day": 3,
+                "open_lunch": "11:30",
+                "close_lunch": "15:30",
+                "open_dinner": "19:00",
+                "close_dinner": "22:00",
+                "restaurant_id": "1",
+            },
+            {
+                "week_day": 5,
+                "open_lunch": "11:30",
+                "close_lunch": "15:30",
+                "open_dinner": "19:00",
+                "close_dinner": "22:00",
+                "restaurant_id": "1",
+            },
+        ]
 
     @classmethod
     def create_tables_json(cls):
-        return ([{
-            "id": 1,
-            "name": "Table 1",
-            "max_seats": 6,
-            "available": True,
-            "restaurant_id": 1
-        }, {
-            "id": 2,
-            "name": "Table 2",
-            "max_seats": 4,
-            "available": True,
-            "restaurant_id": 1
-        }, {
-            "id": 3,
-            "name": "Table 3",
-            "max_seats": 2,
-            "available": True,
-            "restaurant_id": 1
-        }
-        ])
+        return [
+            {
+                "id": 1,
+                "name": "Table 1",
+                "max_seats": 6,
+                "available": True,
+                "restaurant_id": 1,
+            },
+            {
+                "id": 2,
+                "name": "Table 2",
+                "max_seats": 4,
+                "available": True,
+                "restaurant_id": 1,
+            },
+            {
+                "id": 3,
+                "name": "Table 3",
+                "max_seats": 2,
+                "available": True,
+                "restaurant_id": 1,
+            },
+        ]
 
     @classmethod
     def create_tables_noname_json(cls):
-        return ([{
-            "id": 1,
-            "name": "Table 1",
-            "max_seats": 6,
-            "available": True,
-            "restaurant_id": 1
-        }, {
-            "id": 2,
-            "name": "Table 2",
-            "max_seats": 4,
-            "available": True,
-            "restaurant_id": 1
-        }, {
-            "id": 3,
-            "name": "",
-            "max_seats": 2,
-            "available": True,
-            "restaurant_id": 1
-        }
-        ])
+        return [
+            {
+                "id": 1,
+                "name": "Table 1",
+                "max_seats": 6,
+                "available": True,
+                "restaurant_id": 1,
+            },
+            {
+                "id": 2,
+                "name": "Table 2",
+                "max_seats": 4,
+                "available": True,
+                "restaurant_id": 1,
+            },
+            {
+                "id": 3,
+                "name": "",
+                "max_seats": 2,
+                "available": True,
+                "restaurant_id": 1,
+            },
+        ]
 
     @staticmethod
-    def insert_reservation(py_datetime = datetime.datetime(year=2021, month=4, day=27, hour=12, minute=30), avg_time = 30, people_number = 2, table_id = 3, user_id = 1):
+    def insert_reservation(
+        py_datetime=datetime.datetime(year=2021, month=4, day=27, hour=12, minute=30),
+        avg_time=30,
+        people_number=2,
+        table_id=3,
+        user_id=1,
+    ):
         db_session = current_app.config["DB_SESSION"]
 
-        friends_mail=[]
+        friends_mail = []
         if people_number > 1:
             for n in range(1, people_number):
                 friends_mail.append("friend{}@me.com".format(n))
@@ -98,7 +114,9 @@ class Utils:
         # register on db the reservation
         new_reservation = Reservation()
         new_reservation.reservation_date = py_datetime
-        new_reservation.reservation_end = py_datetime + datetime.timedelta(minutes=avg_time)
+        new_reservation.reservation_end = py_datetime + datetime.timedelta(
+            minutes=avg_time
+        )
         new_reservation.customer_id = user_id
         new_reservation.table_id = table_id
         new_reservation.people_number = people_number
@@ -113,6 +131,7 @@ class Utils:
         db_session.commit()
 
         return new_reservation
+
     @staticmethod
     def delete_all_reservations():
         db_session = current_app.config["DB_SESSION"]
@@ -120,7 +139,7 @@ class Utils:
         for reservation in all_reservation:
             db_session.query(Friend).filter_by(reservation_id=reservation.id).delete()
             db_session.commit()
-            db_session.query(Reservation).filter_by(id = reservation.id).delete()
+            db_session.query(Reservation).filter_by(id=reservation.id).delete()
             db_session.commit()
 
     @staticmethod
