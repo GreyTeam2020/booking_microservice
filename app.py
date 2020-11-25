@@ -397,5 +397,6 @@ def shutdown_session(exception=None):
 
 
 if __name__ == "__main__":
-    _init_flask_app(application)
+    #_init_flask_app(application)
+    _init_flask_app(application, "config.BaseConfiguration")
     app.run(port=5004)
