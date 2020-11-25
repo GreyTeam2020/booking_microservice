@@ -58,8 +58,9 @@ def create_booking(private=False):
 
     # check if the user is positive
     current_user = UserService.get_user_info(user_id)
+    current_app.logger.debug("user is positive ? {}".format(current_user.is_positive))
     if current_user.is_positive:
-        HttpUtils.error_message(401, "You are marked as positive!")
+        return HttpUtils.error_message(401, "You are marked as positive!"), 401
     week_day = py_datetime.weekday()
 
     # check if the restaurant is open. 12 in open_lunch means open at lunch. 20 in open_dinner means open at dinner.
